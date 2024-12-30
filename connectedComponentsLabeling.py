@@ -5,6 +5,7 @@ Created on Wed Dec 23 15:11:11 2020
 @author: Youri.Baeyens
 """
 import pandas as pd
+import numpy as np
 import typing
 
 class connectedComponentsLabeler(object):
@@ -23,7 +24,7 @@ class connectedComponentsLabeler(object):
         """
         :parameter edges:  ddges is a Pandas DataFame (two columns named "a" and "b").       
         """
-        self.nodes = [node for node in set(edges["a"]).union(edges["b"])]
+        self.nodes = np.union1d(edges.a,edges.b)
 
         self.numberOfNodes = len(self.nodes)
 
@@ -47,7 +48,7 @@ class connectedComponentsLabeler(object):
         will come the phase where we'll build the forest.
         '''
         
-        self.forest = [i for i in range(self.numberOfNodes)]
+        self.forest = np.arange(self.numberOfNodes, dtype=np.uint32)
 
         '''
         As mentionned above, every node has a dedicated array element.
@@ -80,6 +81,7 @@ class connectedComponentsLabeler(object):
         node and travel to its root with the `findTreeRoot` function
         to identify the connected component it belongs to. 
         '''
+        del(edges)
 
     def findTreeRoot(self, node):
 
@@ -104,6 +106,7 @@ class connectedComponentsLabeler(object):
         
         for n in visitedNodes:
             self.forest[n]=node
+        del(visitedNodes)
         
         return treeRoot
             
@@ -129,5 +132,5 @@ class connectedComponentsLabeler(object):
     def getConnectedCompontents(self):
 
         return pd.DataFrame({'nodeId': self.nodes, 
-                             'componentId': [self.findTreeRoot(i) for i in range(self.numberOfNodes)]
+                             'componentId': [self.findTreeRoot(i) for i in np.arange(self.numberOfNodes,dtype=np.uint32)]
                             })
